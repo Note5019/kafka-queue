@@ -1,5 +1,5 @@
 {
-    "name": "enres/kafka-queue",
+    "name": "note5019/kafka-queue",
     "require": {
         "laravel/framework": "^9.9"
     },
