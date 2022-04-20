@@ -1,0 +1,17 @@
+{
+    "name": "enres/kafka-queue",
+    "require": {
+        "laravel/framework": "^9.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Enres\\KafkaQueue\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Noppadon Tongtrakoon",
+            "email": "noppadon@enres.co"
+        }
+    ]
+}
