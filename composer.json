@@ -1,7 +1,7 @@
 {
-    "name": "note5019/kafka-queue",
+    "name": "enres/kafka-queue",
     "require": {
-        "laravel/framework": "^8.0"
+        "laravel/framework": "^9.0"
     },
     "autoload": {
         "psr-4": {
