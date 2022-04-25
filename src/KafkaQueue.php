@@ -19,22 +19,14 @@ class KafkaQueue extends Queue implements QueueContract
     public function size($queue = null)
     {
     }
-    
+
     public function push($job, $data = '', $queue = null)
     {
-        echo "push job!\n";
-        \Log::info('test');
-        \Log::info('$this->producer: ' . print_r($this->producer, true));
-        \Log::info('$this->producer: ' . print_r(gettype($this->producer), true));
         $topic = $this->producer->newTopic($queue ?? env('KAFKA_QUEUE'));
-        
-        \Log::info('$topic: ' . print_r($topic, true));
-        $topic->produce(RD_KAFKA_PARTITION_UA, 0, 'hellllo');
-        // $topic->produce(RD_KAFKA_PARTITION_UA, 0, serialize($job));
-        $this->producer->flush(100);
-        echo "pushed job!\n";
+        $topic->produce(RD_KAFKA_PARTITION_UA, 0, serialize($job));
+        $this->producer->flush(1000);
     }
-    
+
     public function pushRaw($payload, $queue = null, array $options = [])
     {
     }
@@ -45,24 +37,28 @@ class KafkaQueue extends Queue implements QueueContract
 
     public function pop($queue = null)
     {
-        // echo "hello \n" ;
-        $this->consumer->subscribe([$queue ?? env('KAFKA_QUEUE')]);
+        $this->consumer->subscribe([$queue]);
 
-        $message = $this->consumer->consume(120*1000);
+        try {
+            $message = $this->consumer->consume(120 * 1000);
 
-        switch ($message->err) {
+            switch ($message->err) {
                 case RD_KAFKA_RESP_ERR_NO_ERROR:
-                    var_dump($message->payload);
+                    $job = unserialize($message->payload);
+                    $job->handle();
                     break;
-                case \RD_KAFKA_RESP_ERR__PARTITION_EOF:
-                    echo "No more message; will wait for more\n";
+                case RD_KAFKA_RESP_ERR__PARTITION_EOF:
+                    var_dump("No more messages; will wait for more\n");
                     break;
-                case \RD_KAFKA_RESP_ERR__TIMED_OUT:
-                    echo "No more message; will wait for more\n";
+                case RD_KAFKA_RESP_ERR__TIMED_OUT:
+                    var_dump("Timed out\n");
                     break;
                 default:
                     throw new \Exception($message->errstr(), $message->err);
                     break;
             }
+        } catch (\Exception $e) {
+            var_dump($e->getMessage());
+        }
     }
 }
